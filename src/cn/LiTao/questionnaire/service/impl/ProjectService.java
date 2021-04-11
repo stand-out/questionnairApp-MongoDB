@@ -12,6 +12,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import javax.servlet.ServletContext;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 public class ProjectService extends MyService {
@@ -31,7 +32,7 @@ public class ProjectService extends MyService {
 
     //    创建项目业务
     public String createProject(User user, ServletContext servletContext) {
-
+        log.debug("用户开始创建项目");
         SqlSession sqlSession = createSqlSession();
 //        新建并初始化问卷数据
         Questionnaire questionnaire = new Questionnaire();
@@ -46,6 +47,7 @@ public class ProjectService extends MyService {
 
 //        把当前新建的问卷对象加入容器 加入成功返回对象对应的uuid
         String uuid = questionnaireContainer.addQuestionnaire(questionnaire);
+        log.debug("用户创建项目保存至容器成功");
 
         if (uuid != null) {
 //            生成项目对象并存入数据库
@@ -59,6 +61,7 @@ public class ProjectService extends MyService {
 
             projectMapper.insertProject(project);
             this.sqlSession.commit();
+            log.debug("用户创建项目保存至MySQL成功");
         }
 
         closeSqlSession(sqlSession);
@@ -111,7 +114,7 @@ public class ProjectService extends MyService {
             }
 
             if (result) {
-                projectMapper.upDateProject(newProject);
+                projectMapper.updateProject(newProject);
                 this.sqlSession.commit();
                 returnResult = true;
             }
@@ -120,4 +123,17 @@ public class ProjectService extends MyService {
         return returnResult;
     }
 
+    public List<Project> getProjectListByUserId(int id) {
+        SqlSession sqlSession = createSqlSession();
+        final List<Project> projectByUid = projectMapper.findProjectByUid(id);
+        closeSqlSession(sqlSession);
+        return projectByUid;
+    }
+
+    public void removeProject(int projectId) {
+        SqlSession sqlSession = createSqlSession();
+        projectMapper.removeProject(projectId);
+        this.sqlSession.commit();
+        closeSqlSession(sqlSession);
+    }
 }

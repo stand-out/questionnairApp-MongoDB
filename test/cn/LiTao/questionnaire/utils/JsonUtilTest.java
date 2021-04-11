@@ -5,13 +5,11 @@ import cn.LiTao.questionnaire.pojo.Project;
 import cn.LiTao.questionnaire.pojo.Questionnaire;
 import cn.LiTao.questionnaire.pojo.ResponseBean;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JsonUtilTest {
 
@@ -28,7 +26,7 @@ public class JsonUtilTest {
         responseBean.setMsg("Sms send error...");
 //        responseBean.setData(hashMap);
 
-        System.out.println(JsonUtil.ObjectToString(responseBean));;
+        System.out.println(JsonUtil.objectToString(responseBean));;
     }
 
     @Test

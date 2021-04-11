@@ -63,7 +63,7 @@ public class ProjectMapperTest {
         project.setProjectName("update:" + project.getProjectName());
         project.setProjectStatus("已删除");
 
-        mapper.upDateProject(project);
+        mapper.updateProject(project);
         sqlSession.commit();
     }
 

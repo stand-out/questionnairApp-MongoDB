@@ -28,24 +28,24 @@ public class UserMapperTest {
         sqlSession = factory.openSession();
     }
 
-    @Test
-    public void loginTest() {
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        User user = new User("root", "123456", "186746686222");
-        User result = mapper.findUserByPhoneAndPassword(user);
-        System.out.println(result);
-    }
+//    @Test
+//    public void loginTest() {
+//        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+//        User user = new User("root", "123456", "18674668622");
+//        User result = mapper.findUserByPhoneAndPassword(user);
+//        System.out.println(result);
+//    }
 
-    @Test
-    public void test() {
-
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-
-        User user = new User("root", "123456", "18674668622");
-        mapper.insertUser(user);
-
-        sqlSession.commit();
-    }
+//    @Test
+//    public void test() {
+//
+//        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+//
+//        User user = new User("root", "123456", "18674668622");
+//        mapper.insertUser(user);
+//
+//        sqlSession.commit();
+//    }
 
     @Test
     public void findAllUserDataTest() throws JsonProcessingException {

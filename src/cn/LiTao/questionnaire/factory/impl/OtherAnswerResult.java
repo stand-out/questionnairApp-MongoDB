@@ -18,6 +18,6 @@ public class OtherAnswerResult extends AnswerResult {
 
         List<Map<String, String>> list = AnswerResultListFilter.resultPack(this.answerDataList.getList());
 
-        return JsonUtil.ObjectToString(list);
+        return JsonUtil.objectToString(list);
     }
 }

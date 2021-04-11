@@ -18,6 +18,6 @@ public class ChoiceAnswerResult extends AnswerResult {
 
         Map<String, Integer> statistical = AnswerResultListFilter.statistical(this.answerDataList.getList());
 
-        return JsonUtil.ObjectToString(statistical);
+        return JsonUtil.objectToString(statistical);
     }
 }

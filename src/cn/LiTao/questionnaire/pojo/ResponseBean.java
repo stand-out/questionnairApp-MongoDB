@@ -3,9 +3,6 @@ package cn.LiTao.questionnaire.pojo;
 import cn.LiTao.questionnaire.utils.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import java.util.HashMap;
-import java.util.List;
-
 public class ResponseBean<D> {
 
     private int code;
@@ -16,6 +13,10 @@ public class ResponseBean<D> {
         this.code = code;
         this.data = data;
         this.msg = msg;
+    }
+
+    public static ResponseBean<String> SUCCESS() {
+        return new ResponseBean<>(0, "SUCCESS", "SUCCESS");
     }
 
     public ResponseBean() {
@@ -55,6 +56,6 @@ public class ResponseBean<D> {
     }
 
     public String toJson() throws JsonProcessingException {
-        return JsonUtil.ObjectToString(this);
+        return JsonUtil.objectToString(this);
     }
 }

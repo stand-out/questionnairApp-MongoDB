@@ -7,15 +7,21 @@ import cn.LiTao.questionnaire.service.impl.UserService;
 import cn.LiTao.questionnaire.utils.JsonUtil;
 import cn.LiTao.questionnaire.utils.SmsUtil;
 import cn.LiTao.questionnaire.utils.StringUtil;
+import cn.LiTao.questionnaire.utils.WxApiUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
+/**
+ * @author Devil
+ */
 @Slf4j
 @WebServlet("/api/user/*")
 public class UserController extends MyServlet {
@@ -27,13 +33,41 @@ public class UserController extends MyServlet {
         this.userService = new UserService();
     }
 
+    public void postWxLogin(HttpServletRequest request, HttpServletResponse response) throws IllegalAccessException, IOException {
+        final String code = request.getParameter("code");
+        final String encryptedData = request.getParameter("encryptedData");
+        final String iv = request.getParameter("iv");
+
+        ResponseBean<Object> responseBean = new ResponseBean<>();
+
+        final Map<String, String> responseMap = WxApiUtil.checkCode(code);
+        if (responseMap != null && !responseMap.containsKey(WxApiUtil.WX_API_ERROR_CODE_KEY)) {
+            final String sessionKey = responseMap.get(WxApiUtil.WX_API_SESSION_KEY);
+            final String openId = responseMap.get(WxApiUtil.WX_API_OPEN_ID_KEY);
+
+            final String token = userService.wxLogin(sessionKey, openId, encryptedData, iv);
+            if (StringUtils.isNoneBlank(token)) {
+                responseBean.setCode(0);
+                responseBean.setData(token);
+            } else {
+                responseBean.setCode(2);
+                responseBean.setMsg("登录失败");
+            }
+        } else {
+            log.info("微信用户code码2session失败 code:{}, response:{}", code, responseMap);
+            responseBean.setCode(2);
+            responseBean.setMsg("code error");
+        }
+        response.getWriter().write(responseBean.toJson());
+    }
+
 //    用户登录
     public void postLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 //        获取并封装参数
         String phoneNumber = request.getParameter("phoneNumber");
         String password = request.getParameter("password");
-        User user = new User("", password, phoneNumber);
+        User user = User.builder().password(password).phoneNumber(phoneNumber).build();
 
 //        响应bean对象
         ResponseBean responseBean = new ResponseBean();
@@ -81,11 +115,11 @@ public class UserController extends MyServlet {
 
 //        设置返回内容类型为json
         response.setContentType(session.getServletContext().getMimeType(".json") + ";charset=utf-8");
-        log.info(JsonUtil.ObjectToString(responseBean));
+        log.info(JsonUtil.objectToString(responseBean));
         log.info(session.getServletContext().getMimeType(".json"));
 
 //        把响应对象写入response
-        response.getWriter().write(JsonUtil.ObjectToString(responseBean));
+        response.getWriter().write(JsonUtil.objectToString(responseBean));
     }
 
 //    用户注册

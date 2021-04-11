@@ -8,7 +8,16 @@ import java.util.List;
 
 public interface ProjectMapper {
 
-    @Select("SELECT id, project_name, project_type, project_status, last_modify_time, data_uuid FROM project WHERE uid = #{uid}")
+    @Select("SELECT id, project_name, project_type, project_status, last_modify_time, data_uuid FROM project WHERE uid = #{uid} AND status = 1")
+    @Results(id = "projectListData",
+            value = {@Result(id = true, column = "id", property = "id"),
+                    @Result(column = "project_name", property = "projectName"),
+                    @Result(column = "project_type", property = "projectType"),
+                    @Result(column = "project_status", property = "projectStatus"),
+                    @Result(column = "last_modify_time", property = "lastModifyTime"),
+                    @Result(column = "data_uuid", property = "dataUuid"),
+                    @Result(column = "id", property = "answerCount", one = @One(select = "cn.LiTao.questionnaire.mapper.AnswerUserMapper.countAnswerByPid", fetchType = FetchType.EAGER))
+            })
     List<Project> findProjectByUid(int uid);
 
     @Select("SELECT id, project_name, project_type, project_status, last_modify_time, data_uuid, uid FROM project WHERE id = #{pid}")
@@ -36,6 +45,9 @@ public interface ProjectMapper {
     void insertProject(Project project);
 
     @Update("UPDATE project SET project_name = #{projectName}, project_type=#{projectType}, project_status=#{projectStatus}, last_modify_time=#{lastModifyTime} WHERE id=#{id}")
-    void upDateProject(Project project);
+    void updateProject(Project project);
+
+    @Update("UPDATE project SET status = 0 where id = #{id}")
+    void removeProject(int id);
 
 }
