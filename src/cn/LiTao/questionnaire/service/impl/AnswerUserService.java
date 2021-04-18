@@ -19,6 +19,7 @@ import org.bson.Document;
 
 import javax.servlet.ServletContext;
 import java.util.*;
+import java.util.function.ToIntFunction;
 
 public class AnswerUserService extends MyService {
 
@@ -123,6 +124,8 @@ public class AnswerUserService extends MyService {
 
         AnswerResultListFilter answerDateListFilter = new AnswerResultListFilter();
         Map<String, String> answerCount = new HashMap<>();
+        // 必要参数初始化
+        answerCount.put("fillCount", "{}");
 
 //        查出所有回答pid项目的用户
         List<AnswerUser> answerUserByPid = answerUserMapper.findAnswerUserByPid(pid);
@@ -150,8 +153,8 @@ public class AnswerUserService extends MyService {
 //        获取问卷下所有题目
         List<Problem> questionList = questionnaire.getQuestionList();
 
-
         if (questionList != null) {
+            Map<String, Integer> fillCount = new HashMap<>(questionList.size());
             AnswerResultFactory answerResultFactory = new AnswerResultFactory();
             for (Problem problem : questionList) {
 //            Map<String, String> tempMap = new HashMap<>();
@@ -161,13 +164,15 @@ public class AnswerUserService extends MyService {
                 String resultStr = answerResultFactory.getResultStr(problem.getType(), new AnswerResultList(answerDataList));
 
                 answerCount.put(problemId, resultStr);
-//            answerCount.add(tempMap);
+
+                fillCount.put(problemId,
+                        answerDataList.stream().mapToInt(value -> Objects.isNull(value) || value.getResultMap().isEmpty() ? 0 : 1).sum()
+                );
+
             }
+            answerCount.put("fillCount", JsonUtil.objectToString(fillCount));
         }
 
-
-
-//        jedis.close();
         closeSqlSession(sqlSession);
         return answerCount;
     }

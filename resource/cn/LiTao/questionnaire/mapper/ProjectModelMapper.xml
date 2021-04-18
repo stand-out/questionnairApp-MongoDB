@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.LiTao.questionnaire.mapper.ProjectModelMapper">
+  <resultMap id="BaseResultMap" type="cn.LiTao.questionnaire.pojo.ProjectModel">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="mtid" jdbcType="INTEGER" property="mtid" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+    <result column="p_uuid" jdbcType="VARCHAR" property="pUuid" />
+    <result column="model_title" jdbcType="VARCHAR" property="modelTitle" />
+    <result column="order" jdbcType="INTEGER" property="order" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, mtid, pid, p_uuid, model_title, `order`
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from project_model
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByModelTypeId" resultType="cn.LiTao.questionnaire.pojo.ProjectModel">
+    select
+    <include refid="Base_Column_List" />
+    from project_model
+    where mtid = #{mtid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from project_model
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.ProjectModel" useGeneratedKeys="true">
+    insert into project_model (mtid, pid, p_uuid, 
+      model_title, `order`)
+    values (#{mtid,jdbcType=INTEGER}, #{pid,jdbcType=INTEGER}, #{pUuid,jdbcType=VARCHAR}, 
+      #{modelTitle,jdbcType=VARCHAR}, #{order,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.ProjectModel" useGeneratedKeys="true">
+    insert into project_model
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="mtid != null">
+        mtid,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="pUuid != null">
+        p_uuid,
+      </if>
+      <if test="modelTitle != null">
+        model_title,
+      </if>
+      <if test="order != null">
+        `order`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="mtid != null">
+        #{mtid,jdbcType=INTEGER},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="pUuid != null">
+        #{pUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="modelTitle != null">
+        #{modelTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="order != null">
+        #{order,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.LiTao.questionnaire.pojo.ProjectModel">
+    update project_model
+    <set>
+      <if test="mtid != null">
+        mtid = #{mtid,jdbcType=INTEGER},
+      </if>
+      <if test="pid != null">
+        pid = #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="pUuid != null">
+        p_uuid = #{pUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="modelTitle != null">
+        model_title = #{modelTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="order != null">
+        `order` = #{order,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.LiTao.questionnaire.pojo.ProjectModel">
+    update project_model
+    set mtid = #{mtid,jdbcType=INTEGER},
+      pid = #{pid,jdbcType=INTEGER},
+      p_uuid = #{pUuid,jdbcType=VARCHAR},
+      model_title = #{modelTitle,jdbcType=VARCHAR},
+      `order` = #{order,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

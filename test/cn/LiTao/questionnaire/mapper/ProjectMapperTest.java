@@ -2,6 +2,8 @@ package cn.LiTao.questionnaire.mapper;
 
 import cn.LiTao.questionnaire.pojo.Project;
 import cn.LiTao.questionnaire.pojo.User;
+import cn.LiTao.questionnaire.utils.JsonUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -26,7 +28,7 @@ public class ProjectMapperTest {
     public void findProjectByUidTest() {
         ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
 
-        List<Project> projectList = mapper.findProjectByUid(5);
+        List<Project> projectList = mapper.findProjectByUid(5, "");
 
         System.out.println(projectList);
     }
@@ -40,7 +42,7 @@ public class ProjectMapperTest {
     }
 
     @Test
-    public void insertTest() {
+    public void insertTest() throws JsonProcessingException {
         ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
         UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
         User user = userMapper.findUserByIdSimple(5);
@@ -52,6 +54,8 @@ public class ProjectMapperTest {
 
         mapper.insertProject(project);
         sqlSession.commit();
+
+        System.out.println(JsonUtil.objectToString(project));
     }
 
     @Test

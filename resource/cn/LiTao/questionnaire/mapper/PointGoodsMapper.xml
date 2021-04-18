@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.LiTao.questionnaire.mapper.PointGoodsMapper">
+    <resultMap id="BaseResultMap" type="cn.LiTao.questionnaire.pojo.PointGoods">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="goods_img" jdbcType="VARCHAR" property="goodsImg"/>
+        <result column="goods_name" jdbcType="VARCHAR" property="goodsName"/>
+        <result column="goods_vaue" jdbcType="VARCHAR" property="goodsVaue"/>
+        <result column="price" jdbcType="INTEGER" property="price"/>
+        <result column="order" jdbcType="INTEGER" property="order"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, goods_img, goods_name, goods_vaue, price, `order`, create_time, update_time
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from point_goods
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultType="cn.LiTao.questionnaire.pojo.PointGoods">
+        select
+        <include refid="Base_Column_List"/>
+        from point_goods
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from point_goods
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.PointGoods"
+            useGeneratedKeys="true">
+    insert into point_goods (goods_img, goods_name, goods_vaue, 
+      price, `order`, create_time, 
+      update_time)
+    values (#{goodsImg,jdbcType=VARCHAR}, #{goodsName,jdbcType=VARCHAR}, #{goodsVaue,jdbcType=VARCHAR}, 
+      #{price,jdbcType=INTEGER}, #{order,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.PointGoods"
+            useGeneratedKeys="true">
+        insert into point_goods
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="goodsImg != null">
+                goods_img,
+            </if>
+            <if test="goodsName != null">
+                goods_name,
+            </if>
+            <if test="goodsVaue != null">
+                goods_vaue,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="order != null">
+                `order`,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="goodsImg != null">
+                #{goodsImg,jdbcType=VARCHAR},
+            </if>
+            <if test="goodsName != null">
+                #{goodsName,jdbcType=VARCHAR},
+            </if>
+            <if test="goodsVaue != null">
+                #{goodsVaue,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=INTEGER},
+            </if>
+            <if test="order != null">
+                #{order,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cn.LiTao.questionnaire.pojo.PointGoods">
+        update point_goods
+        <set>
+            <if test="goodsImg != null">
+                goods_img = #{goodsImg,jdbcType=VARCHAR},
+            </if>
+            <if test="goodsName != null">
+                goods_name = #{goodsName,jdbcType=VARCHAR},
+            </if>
+            <if test="goodsVaue != null">
+                goods_vaue = #{goodsVaue,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=INTEGER},
+            </if>
+            <if test="order != null">
+                `order` = #{order,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cn.LiTao.questionnaire.pojo.PointGoods">
+    update point_goods
+    set goods_img = #{goodsImg,jdbcType=VARCHAR},
+      goods_name = #{goodsName,jdbcType=VARCHAR},
+      goods_vaue = #{goodsVaue,jdbcType=VARCHAR},
+      price = #{price,jdbcType=INTEGER},
+      `order` = #{order,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

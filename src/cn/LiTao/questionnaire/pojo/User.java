@@ -25,5 +25,6 @@ public class User {
     private String headerImagePath;
     private String phoneNumber;
     private String wxOpenId;
+    private Integer balance;
     private List<Project> projectList;
 }

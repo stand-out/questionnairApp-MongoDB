@@ -3,9 +3,7 @@ package cn.LiTao.questionnaire.controller.impl;
 import cn.LiTao.questionnaire.constant.ApplicationConstant;
 import cn.LiTao.questionnaire.controller.MyServlet;
 import cn.LiTao.questionnaire.dependent.ProjectStatus;
-import cn.LiTao.questionnaire.pojo.Project;
-import cn.LiTao.questionnaire.pojo.ResponseBean;
-import cn.LiTao.questionnaire.pojo.User;
+import cn.LiTao.questionnaire.pojo.*;
 import cn.LiTao.questionnaire.service.impl.ProjectService;
 import cn.LiTao.questionnaire.utils.JedisUtil;
 import cn.LiTao.questionnaire.utils.JsonUtil;
@@ -18,9 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @WebServlet("/api/project/*")
@@ -204,12 +200,15 @@ public class ProjectController extends MyServlet {
 
     public void getProjectList(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String accessToken = request.getParameter("access_token");
+        String projectName = request.getParameter("project_name");
+
+        projectName = StringUtils.isBlank(projectName) ? "" : projectName;
         ResponseBean<List<Project>> responseBean = new ResponseBean<>();
         if (StringUtils.isNotBlank(accessToken)) {
             final String userJson = JedisUtil.get(ApplicationConstant.REDIS_SESSION_KEY_PREFIX + accessToken);
             final User user = JsonUtil.jsonToObject(userJson, User.class);
             if (Objects.nonNull(user)) {
-                final List<Project> projectList = projectService.getProjectListByUserId(user.getId());
+                final List<Project> projectList = projectService.getProjectListByUserId(user.getId(), projectName);
                 responseBean.setCode(0);
                 responseBean.setData(projectList);
             } else {
@@ -228,5 +227,143 @@ public class ProjectController extends MyServlet {
         final int questionId = Integer.parseInt(request.getParameter("projectId"));
         projectService.removeProject(questionId);
         response.getWriter().write(ResponseBean.SUCCESS().toJson());
+    }
+
+    public void getSendHongBao(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<String> stringResponseBean = new ResponseBean<>();
+
+        final String pid = request.getParameter("pid");
+        final String amount = request.getParameter("amount");
+        final String number = request.getParameter("number");
+        final String type = request.getParameter("type");
+
+        final User sessionUser = SessionUtil.getSessionUser(request);
+
+        if (StringUtils.isBlank(pid) || !StringUtils.isNumeric(pid) ||
+                StringUtils.isBlank(amount) || !StringUtils.isNumeric(amount) ||
+                StringUtils.isBlank(number) || !StringUtils.isNumeric(number) ||
+                StringUtils.isBlank(type) || !StringUtils.isNumeric(type)
+        ) {
+            stringResponseBean.setCode(-1);
+            stringResponseBean.setMsg("参数异常");
+        }
+        else if (Objects.isNull(sessionUser)) {
+            stringResponseBean.setCode(1);
+            stringResponseBean.setMsg("用户未登录");
+        }
+        else {
+            String [] tipMsg = {"成功", "用户异常", "问卷项目不存在", "余额不足", "系统异常"};
+            final int resCode = projectService.sendHongBao4Project(sessionUser.getId(), Integer.parseInt(pid),
+                    Integer.parseInt(type), Integer.parseInt(amount), Integer.parseInt(number));
+
+            stringResponseBean.setMsg(tipMsg[resCode]);
+            stringResponseBean.setCode(resCode == 0 ? 0 : resCode + 1);
+        }
+
+        response.getWriter().println(stringResponseBean.toJson());
+    }
+
+    public void getHongBaoInfo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<Map<String, Integer>> mapResponseBean = new ResponseBean<>();
+
+        final String pid = request.getParameter("pid");
+        if (StringUtils.isBlank(pid) || !StringUtils.isNumeric(pid)) {
+            mapResponseBean.setCode(-1);
+            mapResponseBean.setMsg("参数异常");
+        }
+        else {
+            final Map<String, Integer> hongBaoData = projectService.getHongBaoData(Integer.parseInt(pid));
+            mapResponseBean.setCode(0);
+            mapResponseBean.setMsg("SUCCESS");
+            mapResponseBean.setData(hongBaoData);
+        }
+
+        response.getWriter().println(mapResponseBean.toJson());
+    }
+
+    public void getGetHongBao(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<Map<String, Object>> stringResponseBean = new ResponseBean<>();
+        final String pid = request.getParameter("pid");
+
+        final User user = SessionUtil.getSessionUser(request);
+
+        if (StringUtils.isBlank(pid) || !StringUtils.isNumeric(pid)) {
+            stringResponseBean.setCode(1);
+            stringResponseBean.setMsg("参数异常");
+
+        }
+        else if (Objects.isNull(user)) {
+            stringResponseBean.setCode(2);
+            stringResponseBean.setMsg("用户未登录");
+        } else {
+            final int amount = projectService.getHongBao4Project(user.getId(), Integer.parseInt(pid));
+            if (amount < -1) {
+                stringResponseBean.setCode(3);
+                stringResponseBean.setMsg("系统异常");
+            }
+            else {
+                Map<String, Object> resMap = new HashMap<>(2);
+                resMap.put("amount", amount == -1 ? 0 : amount);
+
+                stringResponseBean.setCode(0);
+                stringResponseBean.setData(resMap);
+                stringResponseBean.setMsg("SUCCESS");
+
+            }
+        }
+
+        response.getWriter().println(stringResponseBean.toJson());
+    }
+
+    public void getProjectModelType (HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<ProjectModelType>> listResponseBean = new ResponseBean<>();
+
+        listResponseBean.setCode(0);
+        listResponseBean.setData(projectService.getModelType());
+
+        response.getWriter().println(listResponseBean.toJson());
+    }
+
+    public void getProjectModel (HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<ProjectModel>> listResponseBean = new ResponseBean<>();
+
+        final String projectModelType = request.getParameter("projectModelType");
+
+        if (StringUtils.isBlank(projectModelType) || !StringUtils.isNumeric(projectModelType)) {
+            listResponseBean.setCode(1);
+            listResponseBean.setMsg("参数异常");
+        }
+        else {
+            listResponseBean.setCode(0);
+            listResponseBean.setData(projectService.getProjectModel(Integer.parseInt(projectModelType)));
+        }
+
+        response.getWriter().println(listResponseBean.toJson());
+    }
+
+    public void getCreateModelProject (HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<String> stringResponseBean = new ResponseBean<>();
+        
+        final String modelId = request.getParameter("modelId");
+        final User sessionUser = SessionUtil.getSessionUser(request);
+        
+        if (Objects.isNull(sessionUser)) {
+            stringResponseBean.setCode(1);
+            stringResponseBean.setMsg("请先登录");
+        }
+        else {
+            final String uuid = projectService.createProjectByModel(sessionUser, modelId, request.getServletContext());
+            if (StringUtils.isBlank(uuid)) {
+                stringResponseBean.setCode(2);
+                stringResponseBean.setMsg("模板数据不存在");
+            }
+            else {
+                stringResponseBean.setCode(0);
+                stringResponseBean.setData(uuid);
+                stringResponseBean.setMsg("SUCCESS!");
+            }
+        }
+        
+        response.getWriter().println(stringResponseBean.toJson());
     }
 }

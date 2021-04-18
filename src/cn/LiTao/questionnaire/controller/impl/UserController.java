@@ -1,13 +1,9 @@
 package cn.LiTao.questionnaire.controller.impl;
 
 import cn.LiTao.questionnaire.controller.MyServlet;
-import cn.LiTao.questionnaire.pojo.ResponseBean;
-import cn.LiTao.questionnaire.pojo.User;
+import cn.LiTao.questionnaire.pojo.*;
 import cn.LiTao.questionnaire.service.impl.UserService;
-import cn.LiTao.questionnaire.utils.JsonUtil;
-import cn.LiTao.questionnaire.utils.SmsUtil;
-import cn.LiTao.questionnaire.utils.StringUtil;
-import cn.LiTao.questionnaire.utils.WxApiUtil;
+import cn.LiTao.questionnaire.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -114,7 +112,7 @@ public class UserController extends MyServlet {
         }
 
 //        设置返回内容类型为json
-        response.setContentType(session.getServletContext().getMimeType(".json") + ";charset=utf-8");
+        response.setContentType(session.getServletContext().getMimeType(".json") +  ";charset=utf-8");
         log.info(JsonUtil.objectToString(responseBean));
         log.info(session.getServletContext().getMimeType(".json"));
 
@@ -166,6 +164,15 @@ public class UserController extends MyServlet {
     public void getUserInfo(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
+        this.basicGetUserInfo(user, response);
+    }
+
+    public void getWxUserInfo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        User user = SessionUtil.getSessionUser(request);
+        this.basicGetUserInfo(user, response);
+    }
+
+    private void basicGetUserInfo(User user, HttpServletResponse response) throws IOException {
         ResponseBean<User> responseBean = new ResponseBean<>();
 
         if (user != null) {
@@ -190,5 +197,75 @@ public class UserController extends MyServlet {
         response.getWriter().write(responseBean.toJson());
     }
 
+    public void getBalanceRecord(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<UserBalanceRecord>> responseBean = new ResponseBean<>();
 
+        final User user = SessionUtil.getSessionUser(request);
+        if (Objects.nonNull(user)) {
+            final List<UserBalanceRecord> userBalanceRecords = userService.findUserBalanceRecord(user.getId());
+            responseBean.setCode(0);
+            responseBean.setData(userBalanceRecords);
+        }
+        else {
+            responseBean.setCode(1);
+            responseBean.setMsg("请登录");
+        }
+
+        response.getWriter().println(responseBean.toJson());
+    }
+
+    public void getAllPointGoods(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<PointGoods>> responseBean = new ResponseBean<>();
+
+        responseBean.setCode(0);
+        responseBean.setData(userService.findAllPointGoods());
+
+        response.getWriter().println(responseBean.toJson());
+    }
+
+    public void getConvertPointGoods(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final ResponseBean<Objects> objectsResponseBean = new ResponseBean<>();
+        final String gid = request.getParameter("gid");
+        final String phone = request.getParameter("phone");
+
+        final User user = SessionUtil.getSessionUser(request);
+
+        if (StringUtils.isBlank(gid) || !StringUtils.isNumeric(gid) || StringUtils.isBlank(phone) || !StringUtils.isNumeric(phone)) {
+            objectsResponseBean.setCode(1);
+            objectsResponseBean.setMsg("参数错误");
+        } else {
+            assert user != null;
+            final int intCode = userService.convertGoods(user.getId(), Integer.parseInt(gid), phone);
+            String [] msgTip = {"成功", "兑换的物品不存在", "用户未登录", "用户余额不足"};
+            objectsResponseBean.setMsg(msgTip[intCode]);
+            objectsResponseBean.setCode(intCode == 0 ? 0 : intCode + 1);
+        }
+
+        response.getWriter().println(objectsResponseBean.toJson());
+    }
+
+    public void getAllConvertRecord(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<ConvertRecord>> listResponseBean = new ResponseBean<>();
+
+        final User user = SessionUtil.getSessionUser(request);
+        if (Objects.isNull(user)) {
+            listResponseBean.setCode(1);
+            listResponseBean.setMsg("用户未登录");
+        }
+        else {
+            final List<ConvertRecord> userAllConvertRecord = userService.getUserAllConvertRecord(user.getId());
+            listResponseBean.setCode(0);
+            listResponseBean.setData(userAllConvertRecord);
+        }
+
+        response.getWriter().println(listResponseBean.toJson());
+    }
+
+    public void getPointRule(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ResponseBean<List<PointRule>> listResponseBean = new ResponseBean<>();
+        listResponseBean.setCode(0);
+        listResponseBean.setData(userService.getPointRule());
+
+        response.getWriter().println(listResponseBean.toJson());
+    }
 }

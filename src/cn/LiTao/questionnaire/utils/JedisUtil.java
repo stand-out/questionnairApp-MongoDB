@@ -20,6 +20,10 @@ public class JedisUtil {
         return pool.getResource();
     }
 
+    public static void close(Jedis jedis) {
+        jedis.close();
+    }
+
     public static void setex(String key, String value, int expire) {
         final Jedis jedis = getJedis();
         jedis.setex(key, expire, value);

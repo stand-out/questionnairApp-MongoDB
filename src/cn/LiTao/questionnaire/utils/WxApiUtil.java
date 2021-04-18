@@ -1,5 +1,6 @@
 package cn.LiTao.questionnaire.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.kevinsawicki.http.HttpRequest;
@@ -25,6 +26,7 @@ public class WxApiUtil {
 
     private static Map<String, String> basicDataMap;
     private static final String WX_CODE2SESSION_URL = "https://api.weixin.qq.com/sns/jscode2session";
+    private static final String WX_CREATE_QR_URL = "https://api.weixin.qq.com/wxa/getwxacodeunlimit";
     private static final String WX_GRANT_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token";
 
     static {
@@ -41,7 +43,7 @@ public class WxApiUtil {
         if (StringUtils.isBlank(accessToken)) {
             accessToken = grantAccessToken();
 
-            JedisUtil.setex(ACCESS_TOKEN_REDIS_KEY, accessToken, REDIS_CACHE_EXPIRE);
+            JedisUtil.setex(ACCESS_TOKEN_REDIS_KEY, accessToken, 3600);
         }
         return accessToken;
     }
@@ -50,13 +52,13 @@ public class WxApiUtil {
         Map<String, String> dataMap = new HashMap<>(basicDataMap);
         dataMap.put("grant_type", "client_credential");
 
-        final HttpRequest httpRequest = HttpRequest.post(WX_GRANT_ACCESS_TOKEN_URL).form(dataMap);
+        final HttpRequest httpRequest = HttpRequest.get(WX_GRANT_ACCESS_TOKEN_URL, dataMap, false);
 
         final Map<String, String> responseMap = sendRequest(httpRequest);
         if (responseMap.containsKey(WX_API_ERROR_CODE_KEY)) {
             throw new IllegalAccessException(responseMap.get("errmsg"));
         }
-        return responseMap.get("");
+        return responseMap.get("access_token");
     }
 
     public static Map<String, String> checkCode(String code) throws IllegalAccessException {
@@ -66,6 +68,19 @@ public class WxApiUtil {
 
         final HttpRequest httpRequest = HttpRequest.post(WX_CODE2SESSION_URL).form(dataMap);
         return sendRequest(httpRequest);
+    }
+
+    public static void getQRCode(String path) throws IllegalAccessException, JsonProcessingException {
+        final String accessToken = getAccessToken();
+        Map<String, String> dataMap = new HashMap<>(2);
+        dataMap.put("page", path);
+        dataMap.put("scene", "share");
+
+        final HttpRequest httpRequest = HttpRequest.post(WX_CREATE_QR_URL + "?access_token=" + accessToken).send(JsonUtil.objectToString(dataMap));
+        if (httpRequest.ok()) {
+            final String responseBody = httpRequest.body();
+            System.out.println("responseBody = " + responseBody);
+        }
     }
 
     private static Map<String, String> sendRequest(HttpRequest httpRequest) throws IllegalAccessException {
@@ -93,5 +108,10 @@ public class WxApiUtil {
 //        getUserInfo();
 ////        {session_key=E1d/6+jfkGjK0/m7pwuLJw==, openid=oBqax4hKtGwqu5r8AZ2JBSTgQbuA}
 //    }
+
+    public static void main(String[] args) throws IllegalAccessException, JsonProcessingException {
+        System.out.println(basicDataMap);
+        getQRCode("/pages/answer/answer");
+    }
 
 }

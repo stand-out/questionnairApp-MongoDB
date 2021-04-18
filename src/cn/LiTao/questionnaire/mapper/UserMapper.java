@@ -9,10 +9,10 @@ public interface UserMapper {
     @Insert("INSERT INTO user(username, header_image_path, phone_number, password, wx_open_id ) VALUES(#{username}, #{headerImagePath}, #{phoneNumber}, #{password}, #{wxOpenId})")
     void insertUser(User user);
 
-    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id FROM user WHERE phone_number = #{phoneNumber} AND password = #{password}")
+    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id, balance FROM user WHERE phone_number = #{phoneNumber} AND password = #{password}")
     User findUserByPhoneAndPassword(User user);
 
-    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id FROM user WHERE id = #{id}")
+    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id, balance FROM user WHERE id = #{id}")
     @Results(
             id = "userAllDataMap",
             value = {
@@ -27,9 +27,11 @@ public interface UserMapper {
     )
     User findUserById(int id);
 
-    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id FROM user WHERE id = #{id}")
+    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id, balance FROM user WHERE id = #{id}")
     User findUserByIdSimple(int id);
 
-    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id FROM user WHERE wx_open_id = #{openId}")
+    @Select("SELECT id, username, password, header_image_path, phone_number, wx_open_id, balance FROM user WHERE wx_open_id = #{openId}")
     User findUserByWxOpenId(String openId);
+
+    int updateUserData(User user);
 }

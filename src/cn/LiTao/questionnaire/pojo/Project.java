@@ -24,6 +24,7 @@ public class Project {
     private Date lastModifyTime;
     private String dataUuid;
     private int answerCount;
+    private int reward;
     @JsonIgnore
     private User user;
 

@@ -6,6 +6,7 @@ import cn.LiTao.questionnaire.utils.AnswerResultListFilter;
 import cn.LiTao.questionnaire.utils.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ChoiceAnswerResult extends AnswerResult {

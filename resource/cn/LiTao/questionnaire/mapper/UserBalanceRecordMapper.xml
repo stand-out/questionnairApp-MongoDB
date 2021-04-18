@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.LiTao.questionnaire.mapper.UserBalanceRecordMapper">
+    <resultMap id="BaseResultMap" type="cn.LiTao.questionnaire.pojo.UserBalanceRecord">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="uid" jdbcType="INTEGER" property="uid"/>
+        <result column="type" jdbcType="BOOLEAN" property="type"/>
+        <result column="change_amount" jdbcType="INTEGER" property="changeAmount"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, `uid`, `type`, change_amount, remark, create_time
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_balance_record
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectByUserId" resultType="cn.LiTao.questionnaire.pojo.UserBalanceRecord">
+        select
+        <include refid="Base_Column_List"/>
+        from user_balance_record
+        where uid = #{uid,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user_balance_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.UserBalanceRecord"
+            useGeneratedKeys="true">
+    insert into user_balance_record (`uid`, `type`, change_amount, 
+      remark, create_time)
+    values (#{uid,jdbcType=INTEGER}, #{type,jdbcType=BOOLEAN}, #{changeAmount,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id"
+            parameterType="cn.LiTao.questionnaire.pojo.UserBalanceRecord" useGeneratedKeys="true">
+        insert into user_balance_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uid != null">
+                `uid`,
+            </if>
+            <if test="type != null">
+                `type`,
+            </if>
+            <if test="changeAmount != null">
+                change_amount,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uid != null">
+                #{uid,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=BOOLEAN},
+            </if>
+            <if test="changeAmount != null">
+                #{changeAmount,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cn.LiTao.questionnaire.pojo.UserBalanceRecord">
+        update user_balance_record
+        <set>
+            <if test="uid != null">
+                `uid` = #{uid,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                `type` = #{type,jdbcType=BOOLEAN},
+            </if>
+            <if test="changeAmount != null">
+                change_amount = #{changeAmount,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cn.LiTao.questionnaire.pojo.UserBalanceRecord">
+    update user_balance_record
+    set `uid` = #{uid,jdbcType=INTEGER},
+      `type` = #{type,jdbcType=BOOLEAN},
+      change_amount = #{changeAmount,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

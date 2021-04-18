@@ -1,10 +1,8 @@
 package cn.LiTao.questionnaire.service.impl;
 
 import cn.LiTao.questionnaire.constant.ApplicationConstant;
-import cn.LiTao.questionnaire.mapper.UserMapper;
-import cn.LiTao.questionnaire.pojo.Project;
-import cn.LiTao.questionnaire.pojo.User;
-import cn.LiTao.questionnaire.pojo.WxUser;
+import cn.LiTao.questionnaire.mapper.*;
+import cn.LiTao.questionnaire.pojo.*;
 import cn.LiTao.questionnaire.service.MyService;
 import cn.LiTao.questionnaire.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -94,5 +95,107 @@ public class UserService extends MyService {
         this.sqlSession.commit();
         closeSqlSession(sqlSession);
         return token;
+    }
+
+    public List<UserBalanceRecord> findUserBalanceRecord(int uid) {
+        final SqlSession sqlSession = createSqlSession();
+        final UserBalanceRecordMapper mapper = sqlSession.getMapper(UserBalanceRecordMapper.class);
+
+        final List<UserBalanceRecord> userBalanceRecords = mapper.selectByUserId(uid);
+        sqlSession.close();
+        return userBalanceRecords;
+    }
+
+
+    public List<PointGoods> findAllPointGoods() {
+        final SqlSession sqlSession = createSqlSession();
+        final PointGoodsMapper mapper = sqlSession.getMapper(PointGoodsMapper.class);
+
+        final List<PointGoods> pointGoods = mapper.selectAll();
+        sqlSession.close();
+
+        return  pointGoods;
+    }
+
+    public Integer convertGoods(int uid, int gid, String phone) {
+        final SqlSession sqlSession = createSqlSession();
+        final PointGoodsMapper pointGoodsMapper = sqlSession.getMapper(PointGoodsMapper.class);
+        final UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+
+        final User user = userMapper.findUserByIdSimple(uid);
+        final PointGoods pointGoods = pointGoodsMapper.selectByPrimaryKey(gid);
+
+
+        if (Objects.isNull(pointGoods)) {
+            return 1;
+        } else if (Objects.isNull(user)) {
+            return 2;
+        } else if (user.getBalance().compareTo(pointGoods.getPrice()) < 0) {
+            return 3;
+        }
+
+        final ConvertRecordMapper convertRecordMapper = sqlSession.getMapper(ConvertRecordMapper.class);
+        final UserBalanceRecordMapper userBalanceRecordMapper = sqlSession.getMapper(UserBalanceRecordMapper.class);
+        boolean success = true;
+
+        final ConvertRecord convertRecord = new ConvertRecord();
+        convertRecord.setUid(user.getId());
+        convertRecord.setGid(gid);
+        convertRecord.setGoodsName(pointGoods.getGoodsName());
+        convertRecord.setStatus(0);
+        convertRecord.setRemark("等待客服联系");
+        convertRecord.setContactNumber(phone);
+        convertRecord.setCreateTime(new Date());
+        convertRecord.setUpdateTime(new Date());
+
+        final UserBalanceRecord userBalanceRecord = new UserBalanceRecord();
+        userBalanceRecord.setUid(user.getId());
+        userBalanceRecord.setType(0);
+        userBalanceRecord.setChangeAmount(pointGoods.getPrice());
+        userBalanceRecord.setRemark("兑换" + pointGoods.getGoodsName());
+        userBalanceRecord.setCreateTime(new Date());
+
+        final User updateUser = User.builder()
+                .id(user.getId())
+                .balance(user.getBalance() - pointGoods.getPrice())
+                .build();
+
+        try {
+            convertRecordMapper.insert(convertRecord);
+            userBalanceRecordMapper.insert(userBalanceRecord);
+            userMapper.updateUserData(updateUser);
+            sqlSession.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            sqlSession.rollback();
+            success = false;
+        }
+        finally {
+            sqlSession.close();
+        }
+        return success ? 0 : 4;
+    }
+
+    public List<ConvertRecord> getUserAllConvertRecord(int uid) {
+        if (uid == 0) {
+            return Collections.emptyList();
+        }
+        final SqlSession sqlSession = createSqlSession();
+        final ConvertRecordMapper convertRecordMapper = sqlSession.getMapper(ConvertRecordMapper.class);
+
+        final List<ConvertRecord> convertRecords = convertRecordMapper.selectByUserId(uid);
+        sqlSession.close();
+
+        return convertRecords;
+    }
+
+    public List<PointRule> getPointRule() {
+        final SqlSession sqlSession = createSqlSession();
+        final PointRuleMapper mapper = sqlSession.getMapper(PointRuleMapper.class);
+
+        final List<PointRule> pointRules = mapper.selectAll();
+        sqlSession.close();
+        return pointRules;
     }
 }

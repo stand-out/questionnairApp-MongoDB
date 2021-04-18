@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.LiTao.questionnaire.mapper.UserHongbaoRecordMapper">
+  <resultMap id="BaseResultMap" type="cn.LiTao.questionnaire.pojo.UserHongbaoRecord">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+    <result column="uid" jdbcType="INTEGER" property="uid" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="amount" jdbcType="INTEGER" property="amount" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, pid, `uid`, user_name, amount, create_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from user_hongbao_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user_hongbao_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.UserHongbaoRecord" useGeneratedKeys="true">
+    insert into user_hongbao_record (pid, `uid`, user_name, 
+      amount, create_time)
+    values (#{pid,jdbcType=INTEGER}, #{uid,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, 
+      #{amount,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.LiTao.questionnaire.pojo.UserHongbaoRecord" useGeneratedKeys="true">
+    insert into user_hongbao_record
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="uid != null">
+        `uid`,
+      </if>
+      <if test="userName != null">
+        user_name,
+      </if>
+      <if test="amount != null">
+        amount,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="pid != null">
+        #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="uid != null">
+        #{uid,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null">
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null">
+        #{amount,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.LiTao.questionnaire.pojo.UserHongbaoRecord">
+    update user_hongbao_record
+    <set>
+      <if test="pid != null">
+        pid = #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="uid != null">
+        `uid` = #{uid,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null">
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null">
+        amount = #{amount,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.LiTao.questionnaire.pojo.UserHongbaoRecord">
+    update user_hongbao_record
+    set pid = #{pid,jdbcType=INTEGER},
+      `uid` = #{uid,jdbcType=INTEGER},
+      user_name = #{userName,jdbcType=VARCHAR},
+      amount = #{amount,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
